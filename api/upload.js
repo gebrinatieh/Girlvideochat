@@ -3,18 +3,29 @@ import FormData from 'form-data';
 
 export default async function handler(req, res) {
   try {
-    // 1) Get the Data‑URL from JSON
-    const { image } = await req.json();
-    if (!image) throw new Error('No image in request');
+    // 1) Read the raw request body into a string
+    let bodyText = '';
+    for await (const chunk of req) {
+      bodyText += chunk;
+    }
 
-    // 2) Extract MIME type & base64
+    // 2) Parse it as JSON
+    let parsed;
+    try {
+      parsed = JSON.parse(bodyText);
+    } catch (e) {
+      throw new Error('Invalid JSON');
+    }
+    const image = parsed.image;
+    if (!image) throw new Error('No image field in JSON');
+
+    // 3) Decode the Data‑URL
     const match = image.match(/^data:(.+);base64,(.+)$/);
-    if (!match) throw new Error('Invalid Data‑URL');
-
+    if (!match) throw new Error('Invalid Data‑URL format');
     const [, mimeType, b64] = match;
     const buffer = Buffer.from(b64, 'base64');
 
-    // 3) Build Discord form
+    // 4) Build the multipart form for Discord
     const form = new FormData();
     form.append('file', buffer, {
       filename: 'snapshot.jpg',
@@ -24,7 +35,7 @@ export default async function handler(req, res) {
       content: '📸 New snapshot!'
     }));
 
-    // 4) POST to your webhook
+    // 5) Send to Discord
     const discordRes = await fetch(process.env.DISCORD_WEBHOOK, {
       method: 'POST',
       body: form,
@@ -32,16 +43,17 @@ export default async function handler(req, res) {
     });
 
     if (!discordRes.ok) {
-      const errText = await discordRes.text();
-      console.error('Discord error:', errText);
-      return res.status(502).send(errText);
+      const text = await discordRes.text();
+      console.error('Discord error:', text);
+      return res.status(502).send(text);
     }
-    res.status(200).send('OK');
+
+    return res.status(200).send('OK');
   } catch (err) {
     console.error('Function error:', err);
-    res.status(500).send(err.message);
+    return res.status(500).send(err.message);
   }
 }
 
-// Tell Vercel to parse JSON automatically
-export const config = { api: { bodyParser: true } };
+// Let Vercel serve this function without special parsing
+export const config = { api: { bodyParser: false } };
